@@ -4,6 +4,8 @@ from django.test import TestCase
 from django.core.urlresolvers import resolve
 from lists.views import home_page
 
+from lists.models import Item
+
 
 class HomePageTest(TestCase):
     def test_root_url_resolves_to_home_page_view(self):
@@ -28,3 +30,24 @@ class HomePageTest(TestCase):
             {'new_item_text': 'A new list item'}
         )
         self.assertEqual(response.content.decode(), expected_html)
+
+
+class ItemModelTest(TestCase):
+
+    def test_saving_and_retrieving_items(self):
+        text1 = 'The first (ever) list item'
+        item = Item()
+        item.text = text1
+        item.save()
+        
+        text2 = 'Item the second'
+        item = Item()
+        item.text = text2
+        item.save()
+
+        saved_items = Item.objects.all()
+        self.assertEqual(saved_items.count(), 2)
+        saved_item1 = saved_items[0]
+        saved_item2 = saved_items[1]
+        self.assertEqual(saved_item1.text, text1)
+        self.assertEqual(saved_item2.text, text2)
