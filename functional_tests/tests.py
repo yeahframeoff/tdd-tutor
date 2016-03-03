@@ -76,8 +76,8 @@ class NewVisitorTest(LiveServerTestCase):
         # Dave visits the gome page. No sign of previous user
         self.browser.get(self.live_server_url)
         page_text = self.browser.find_element_by_tag_name('body').text
-        self.assertNoIn('Buy tomatoes', page_text)
-        self.assertNoIn('Use tomatoes for whatever', page_text)
+        self.assertNotIn('Buy tomatoes', page_text)
+        self.assertNotIn('Use tomatoes for whatever', page_text)
 
         # Dave starts a new list by entering a new item
         inputbox = self.browser.find_element_by_id('id_new_item')
@@ -91,8 +91,8 @@ class NewVisitorTest(LiveServerTestCase):
 
         # Again, there is no sign of previous user
         page_text = self.browser.find_element_by_tag_name('body').text
-        self.assertNoIn('Buy tomatoes', page_text)
-        self.assertNoIn('Use tomatoes for whatever', page_text)
+        self.assertNotIn('Buy tomatoes', page_text)
+        self.assertNotIn('Use tomatoes for whatever', page_text)
         self.assertIn('Go to gym', page_text)
 
         # Satisfied, users quit
