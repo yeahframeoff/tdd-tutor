@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.core.urlresolvers import resolve
 from lists.views import home_page
 
-from lists.models import Item
+from lists.models import Item, List
 
 
 class HomePageTest(TestCase):
@@ -19,41 +19,64 @@ class HomePageTest(TestCase):
         self.assertEqual(response.content.decode(), expected_html)
 
 
-class ItemModelTest(TestCase):
+class ListAndItemModelTest(TestCase):
 
     def test_saving_and_retrieving_items(self):
+        the_list = List()
+        the_list.save()
+
         text1 = 'The first (ever) list item'
         item = Item()
         item.text = text1
+        item.list = the_list
         item.save()
         
         text2 = 'Item the second'
         item = Item()
         item.text = text2
+        item.list = the_list
         item.save()
+
+        saved_list = List.objects.first()
+        self.assertEqual(saved_list, the_list)
 
         saved_items = Item.objects.all()
         self.assertEqual(saved_items.count(), 2)
         saved_item1 = saved_items[0]
         saved_item2 = saved_items[1]
         self.assertEqual(saved_item1.text, text1)
+        self.assertEqual(saved_item1.list, the_list)
         self.assertEqual(saved_item2.text, text2)
+        self.assertEqual(saved_item2.list, the_list)
 
 
 class ListViewTest(TestCase):
 
-    def test_displays_all_list_items(self):
-        Item.objects.create(text='das item eins')
-        Item.objects.create(text='das item zwei')
+    def test_displays_only_items_for_that_list(self):
+        correct_list = List.objects.create()
+        Item.objects.create(text='das item eins', list=correct_list)
+        Item.objects.create(text='das item zwei', list=correct_list)
+        other_list = List.objects.create()
+        Item.objects.create(text='anderes item eins', list=other_list)
+        Item.objects.create(text='anderes item zwei', list=other_list)
 
-        response = self.client.get('/lists/the-only-list-in-the-world/')
+        response = self.client.get('/lists/%d/' % correct_list.id)
 
         self.assertContains(response, 'das item eins')
         self.assertContains(response, 'das item zwei')
+        self.assertNotContains(response, 'anderes item eins')
+        self.assertNotContains(response, 'anderes item zwei')
 
     def test_uses_list_template(self):
-        response = self.client.get('/lists/the-only-list-in-the-world/')
+        the_list = List.objects.create()
+        response = self.client.get('/lists/%d/' % the_list.id)
         self.assertTemplateUsed(response, 'list.html')
+
+    def test_passes_correct_list_to_template(self):
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+        response = self.client.get('/lists/%d/' % correct_list.id)
+        self.assertEqual(response.context['list'], correct_list)
 
 
 class NewListTest(TestCase):
@@ -73,4 +96,33 @@ class NewListTest(TestCase):
             '/lists/new', 
             data={'item_text': 'A new list item'}
         )
-        self.assertRedirects(response, '/lists/the-only-list-in-the-world/')
+        new_list = List.objects.first()
+        self.assertRedirects(response, '/lists/%d/' % new_list.id)
+
+
+class NewItemList(TestCase):
+
+    def test_can_save_a_POST_request_to_an_existing_list(self):
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+
+        self.client.post(
+            '/lists/%d/add' % correct_list.id,
+            data={'item_text': 'A new item for an exisitng list'}
+        )
+
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'A new item for an exisitng list')
+        self.assertEqual(new_item.list, correct_list)
+
+    def test_redirects_to_list_view(self):
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+
+        response = self.client.post(
+            '/lists/%d/add' % correct_list.id,
+            data={'item_text': 'A new item for an exisitng list'}
+        )
+
+        self.assertRedirects(response, '/lists/%d/' % correct_list.id)
