@@ -5,9 +5,10 @@ from selenium.webdriver.common.keys import Keys
 
 
 class NewVisitorTest(LiveServerTestCase):
+    browser_class = webdriver.Opera
 
     def setUp(self):
-        self.browser = webdriver.Opera()
+        self.browser = self.browser_class()
         self.browser.implicitly_wait(3)
 
     def tearDown(self):
@@ -19,6 +20,10 @@ class NewVisitorTest(LiveServerTestCase):
         row_texts = [row.text for row in table_rows]
         for needle in needles:
             self.assertIn(needle, row_texts)
+
+    def restart_browser(self):
+        self.browser.quit()
+        self.browser = self.browser_class()
 
 
     def test_can_start_a_list_and_retrieve_it_later(self):
@@ -43,10 +48,12 @@ class NewVisitorTest(LiveServerTestCase):
         inputbox.send_keys('Buy tomatoes')
 
 
-        # When she hits enter, the page updates, and now the page lists
-        # "1: Buy peacock feathers" as an item in a to-do list
+        # When she hits enter, the page updates, she is taken to a new URL,
+        # and now the page lists "1: Buy peacock feathers" 
+        # as an item in a to-do list
         inputbox.send_keys(Keys.ENTER)
-
+        eidth_list_url = self.browser.current_url
+        self.assertRegex(eidth_list_url, '/lists/.+')
         self.check_for_rows_in_list_table('#1: Buy tomatoes')
 
         # There is still a text box inviting her to add another item. She
@@ -59,13 +66,35 @@ class NewVisitorTest(LiveServerTestCase):
         self.check_for_rows_in_list_table('#1: Buy tomatoes',
                                           '#2: Use tomatoes for whatever')
 
-        # Edith wonders whether the site will remember her list. Then she sees
-        # that the site has generated a unique URL for her -- there is some
-        # explanatory text to that effect.
+        # Now a new user, Dave, opens the site
 
-        self.fail('Finish the test!')
-        # She visits that URL - her to-do list is still there.
+        ## we have new browser session here to make sure there is no
+        ## info of previous user
 
-        # Satisfied, she goes back to sleep
+        self.restart_browser()
+
+        # Dave visits the gome page. No sign of previous user
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNoIn('Buy tomatoes', page_text)
+        self.assertNoIn('Use tomatoes for whatever', page_text)
+
+        # Dave starts a new list by entering a new item
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Go to gym')
+        inputbox.send_keys(Keys.ENTER)
+
+        # Dave gets his own unique url
+        dave_list_url = self.browser.current_url
+        self.assertRegex(dave_list_url, '/lists/.+')
+        self.assertNotEqual(eidth_list_url, dave_list_url)
+
+        # Again, there is no sign of previous user
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNoIn('Buy tomatoes', page_text)
+        self.assertNoIn('Use tomatoes for whatever', page_text)
+        self.assertIn('Go to gym', page_text)
+
+        # Satisfied, users quit
 
         self.browser.quit()
