@@ -1,5 +1,5 @@
 from selenium import webdriver
-from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC 
 
 
-class NewVisitorTest(LiveServerTestCase):
+class NewVisitorTest(StaticLiveServerTestCase):
     browser_class = webdriver.Opera
 
     def setUp(self):
@@ -15,6 +15,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.browser.implicitly_wait(3)
 
     def tearDown(self):
+        # self.browser.refresh()
         self.browser.quit()
 
     def check_for_rows_in_list_table(self, *needles):
@@ -25,6 +26,7 @@ class NewVisitorTest(LiveServerTestCase):
             self.assertIn(needle, row_texts)
 
     def restart_browser(self):
+        # self.browser.refresh()
         self.browser.quit()
         self.browser = self.browser_class()
 
