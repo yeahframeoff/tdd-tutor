@@ -2,6 +2,9 @@ from selenium import webdriver
 from django.test import LiveServerTestCase
 
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC 
 
 
 class NewVisitorTest(LiveServerTestCase):
@@ -26,7 +29,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.browser = self.browser_class()
 
 
-    def test_can_start_a_list_and_retrieve_it_later(self):
+    def ttest_can_start_a_list_and_retrieve_it_later(self):
         # Edith has heard about a cool new online to-do app. She goes
         # to check out its homepage
         self.browser.get(self.live_server_url)
@@ -98,3 +101,24 @@ class NewVisitorTest(LiveServerTestCase):
         # Satisfied, users quit
 
         self.browser.quit()
+
+    def test_layout_and_styling(self):
+        # User goes to the home page
+        self.browser.get(self.live_server_url)
+        self.browser.set_window_size(1024, 768)
+
+        # User notices the input box is nicely centered
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width'] / 2,
+            512,
+            delta=10
+        )
+        inputbox.send_keys('testing\n')
+        inputbox = WebDriverWait(self.browser, 4)\
+            .until(EC.element_to_be_clickable((By.ID, 'id_new_item')))
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width'] / 2,
+            512,
+            delta=10
+        )
