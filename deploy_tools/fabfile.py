@@ -4,8 +4,8 @@ import random
 
 REPO_URL = 'https://github.com/yeahframeoff/tdd-tutor.git'
 
-def deploy():
-    site_folder = '/sites/tdd-tutor'
+def deploy(folder):
+    site_folder = '/sites/' + folder
     source_folder = site_folder + '/source'
     _create_directory_structure_if_necessary(site_folder)
     _get_latest_source(source_folder)
