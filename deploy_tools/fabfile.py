@@ -5,7 +5,7 @@ import random
 REPO_URL = 'https://github.com/yeahframeoff/tdd-tutor.git'
 
 def deploy():
-    site_folder = '/sites/%s' % (env.user, env.host)  #23
+    site_folder = '/sites/%s' % (env.host)  #23
     source_folder = site_folder + '/source'
     _create_directory_structure_if_necessary(site_folder)
     _get_latest_source(source_folder)
@@ -42,4 +42,20 @@ def _update_settings(source_folder, site_name):
         key = ''.join(random.SystemRandom().choice(chars) for _ in range(50))
         append(secret_key_file, "SECRET_KEY = '%s'" % key)
     append(settings_path, '\nfrom .secret_key import SECRET_KEY')
-    
+
+
+def _update_virtualenv(source_folder):
+    venv_folder = source_folder + '../venv'
+    if not exists(venv_folder + '/bin/pip3'):
+        run('virtualenv --python=python3 %s' % venv_folder)
+    run('%s/bin/pip3 install -r %s/requirements.txt' % (
+        venv_folder, source_folder
+    ))
+
+
+def _update_static_files(source_folder):
+    run('cd %s && ../venv/bin/python3 manage.py collectstatic --noinput' % source_folder)
+
+
+def _update_database(source_folder):
+    run('cd %s && ../venv/bin/python3 manage.py migrate --noinput' % source_folder)
