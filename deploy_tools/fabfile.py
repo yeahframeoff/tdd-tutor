@@ -5,7 +5,7 @@ import random
 REPO_URL = 'https://github.com/yeahframeoff/tdd-tutor.git'
 
 def deploy():
-    site_folder = '/sites/%s' % (env.host)  #23
+    site_folder = '/sites/tdd-tutor'
     source_folder = site_folder + '/source'
     _create_directory_structure_if_necessary(site_folder)
     _get_latest_source(source_folder)
@@ -45,7 +45,7 @@ def _update_settings(source_folder, site_name):
 
 
 def _update_virtualenv(source_folder):
-    venv_folder = source_folder + '../venv'
+    venv_folder = source_folder + '/../venv'
     if not exists(venv_folder + '/bin/pip3'):
         run('virtualenv --python=python3 %s' % venv_folder)
     run('%s/bin/pip3 install -r %s/requirements.txt' % (
