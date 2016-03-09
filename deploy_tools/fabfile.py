@@ -48,7 +48,7 @@ def _update_virtualenv(source_folder):
     venv_folder = source_folder + '/../venv'
     if not exists(venv_folder + '/bin/pip3'):
         run('virtualenv --python=python3 %s' % venv_folder)
-    run('%s/bin/pip3 install -r %s/requirements.txt' % (
+    run('%s/bin/pip3 install -r %s/requirements.pip' % (
         venv_folder, source_folder
     ))
 
