@@ -1,37 +1,10 @@
-import sys
+from .base import FunctionalTest
 from selenium import webdriver
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC 
 
 
-class NewVisitorTest(StaticLiveServerTestCase):
-    browser_class = webdriver.Opera
-
-    @classmethod
-    def setUpClass(cls):
-        for arg in sys.argv:
-            if 'liveserver' in arg:
-                cls.server_url = 'http://' + arg.split('=')[1]
-                return
-        super().setUpClass()
-        cls.server_url = cls.live_server_url
-
-    @classmethod
-    def tearDownClass(cls):
-        if cls.server_url == cls.live_server_url:
-            super().tearDownClass()
-
-    def setUp(self):
-        self.browser = self.browser_class()
-        self.browser.implicitly_wait(3)
-
-    def tearDown(self):
-        # self.browser.refresh()
-        self.browser.quit()
+class NewVisitorTest(FunctionalTest):
 
     def check_for_rows_in_list_table(self, *needles):
         table = self.browser.find_element_by_id('id_list_table')
@@ -39,12 +12,6 @@ class NewVisitorTest(StaticLiveServerTestCase):
         row_texts = [row.text for row in table_rows]
         for needle in needles:
             self.assertIn(needle, row_texts)
-
-    def restart_browser(self):
-        # self.browser.refresh()
-        self.browser.quit()
-        self.browser = self.browser_class()
-
 
     def test_can_start_a_list_and_retrieve_it_later(self):
         # Edith has heard about a cool new online to-do app. She goes
@@ -118,24 +85,3 @@ class NewVisitorTest(StaticLiveServerTestCase):
         # Satisfied, users quit
 
         self.browser.quit()
-
-    def test_layout_and_styling(self):
-        # User goes to the home page
-        self.browser.get(self.server_url)
-        self.browser.set_window_size(1024, 768)
-
-        # User notices the input box is nicely centered
-        inputbox = self.browser.find_element_by_id('id_new_item')
-        self.assertAlmostEqual(
-            inputbox.location['x'] + inputbox.size['width'] / 2,
-            512,
-            delta=10
-        )
-        inputbox.send_keys('testing\n')
-        inputbox = WebDriverWait(self.browser, 4)\
-            .until(EC.element_to_be_clickable((By.ID, 'id_new_item')))
-        self.assertAlmostEqual(
-            inputbox.location['x'] + inputbox.size['width'] / 2,
-            512,
-            delta=10
-        )
