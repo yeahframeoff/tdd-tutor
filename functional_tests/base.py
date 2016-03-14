@@ -35,3 +35,10 @@ class FunctionalTest(StaticLiveServerTestCase):
         # self.browser.refresh()
         self.browser.quit()
         self.browser = self.browser_class()
+
+    def check_for_rows_in_list_table(self, *needles):
+        table = self.browser.find_element_by_id('id_list_table')
+        table_rows = table.find_elements_by_tag_name('tr')
+        row_texts = {row.text for row in table_rows}
+        needles = set(needles)
+        self.assertEquals(row_texts & needles, needles)

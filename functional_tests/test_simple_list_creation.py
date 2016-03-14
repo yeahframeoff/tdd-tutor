@@ -6,13 +6,6 @@ from selenium.webdriver.common.keys import Keys
 
 class NewVisitorTest(FunctionalTest):
 
-    def check_for_rows_in_list_table(self, *needles):
-        table = self.browser.find_element_by_id('id_list_table')
-        table_rows = table.find_elements_by_tag_name('tr')
-        row_texts = [row.text for row in table_rows]
-        for needle in needles:
-            self.assertIn(needle, row_texts)
-
     def test_can_start_a_list_and_retrieve_it_later(self):
         # Edith has heard about a cool new online to-do app. She goes
         # to check out its homepage
