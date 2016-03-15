@@ -18,6 +18,6 @@ from lists import views
 
 
 urlpatterns = [
-    url(r'^new$', view=views.new_list, name='view_list'),
+    url(r'^new$', view=views.new_list, name='new_list'),
     url(r'^(\d+)/$', view=views.view_list, name='view_list'),
 ]
