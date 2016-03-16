@@ -1,3 +1,5 @@
+from unittest import skip
+
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.test import TestCase
@@ -104,6 +106,20 @@ class ListViewTest(TestCase):
     def test_for_invalid_passes_form_to_template(self):
         response = self.send_invalid_input_POST_request()
         self.assertIsInstance(response.context['form'], ItemForm)
+
+    @skip
+    def test_duplicate_item_validation_errors_end_up_on_list_page(self):
+        list1 = List.objects.create()
+        item1 = Item.objects.create(list=list1, text='Sehenswuerdigkeiten')
+        response = self.client.post(
+            '/lists/%d/' % list1.id,
+            data={'text': 'Sehenswuerdigkeiten'}
+        )
+
+        expected_error = escape("You've already got this in your list")
+        self.assertContains(response, expected_error)
+        self.assertTemplateUsed(response, 'list.html')
+        self.assertEqual(Item.objects.count(), 1)
 
 
 class NewListTest(TestCase):
