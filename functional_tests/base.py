@@ -4,6 +4,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from unittest import skip
 
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
 
 
 class FunctionalTest(StaticLiveServerTestCase):
@@ -42,3 +43,10 @@ class FunctionalTest(StaticLiveServerTestCase):
         row_texts = {row.text for row in table_rows}
         needles = set(needles)
         self.assertEquals(row_texts & needles, needles)
+
+    def get_element_input_box_locator(self):
+        return By.ID, 'id_text'
+
+    def get_element_input_box(self):
+        locator = self.get_element_input_box_locator()
+        return self.browser.find_element(*locator)
