@@ -12,7 +12,7 @@
 <body>
 <div class="container">
     <div class="navbar">
-        {% if user.is_authenticated %}
+        {% if user.email %}
             <p>Logged in as <strong>{{ user.email }}</strong></p>
             <p><a id="logout" href="{% url 'logout' %}">Sign out</a></p>
         {% else %}
@@ -50,10 +50,11 @@
 <script src="https://login.persona.org/include.js"></script>
 <script>
 jQuery(document).ready(function($) {
-    $('#login').click(function(){ navigator.id.request() });
-    $('#logout').click(function(){ navigator.id.logout() });
 
-    var currentUser = '{{ user.mail }}' || null;
+    $('#login').click(function() { navigator.id.request(); });
+    $('#logout').click(function() { navigator.id.logout(); });
+
+    var currentUser = '{{ user.email }}' || null;
     var csrfToken = '{{ csrf_token }}';
     console.log(currentUser);
 
@@ -66,7 +67,7 @@ jQuery(document).ready(function($) {
         },
         onlogout: function() {
             $.post('/accounts/logout')
-                .always(function() {window.location.reload()});
+                .always(function() { window.location.reload(); });
         }
     });
 });

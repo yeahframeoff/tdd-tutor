@@ -43,7 +43,7 @@ INSTALLED_APPS = (
 
 
 AUTH_USER_MODEL = 'accounts.ListUser'
-AUTHENICATION_BACKENDS = (
+AUTHENTICATION_BACKENDS = (
     'accounts.authentication.PersonaAuthenticationBackend',
 )
 

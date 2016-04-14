@@ -8,7 +8,6 @@ class PersonaAuthenticationBackend:
         data = {'assertion': assertion, 'audience': 'localhost'}
         print('sending to mozilla', data, file=sys.stderr)
         response = requests.post('https://verifier.login.persona.org/verify', data=data)
-
         print('got', file=sys.stderr)
 
         if response.ok:

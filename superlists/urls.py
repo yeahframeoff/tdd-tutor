@@ -17,10 +17,12 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from lists import views as list_views
 from lists import urls as list_urls
+from accounts import urls as auth_urls
 
 
 urlpatterns = [
     # url(r'^admin/', include(admin.site.urls)),
     url(r'^$', view=list_views.home_page, name='home'),
     url(r'^lists/', include(list_urls)),
+    url(r'^accounts/', include(auth_urls)),
 ]

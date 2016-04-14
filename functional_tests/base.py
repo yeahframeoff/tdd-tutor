@@ -10,7 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 class FunctionalTest(StaticLiveServerTestCase):
-    browser_class = webdriver.Opera
+    browser_class = webdriver.Firefox
 
     @classmethod
     def setUpClass(cls):

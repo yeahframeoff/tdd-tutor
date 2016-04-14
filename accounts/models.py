@@ -1,8 +1,8 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 
 
-class ListUserManager(models.Manager):
+class ListUserManager(BaseUserManager):
 
     def create_user(self, email):
         ListUser.objects.create(email=email)
@@ -18,11 +18,5 @@ class ListUser(AbstractBaseUser, PermissionsMixin):
 
     objects = ListUserManager()
 
-    @property
-    def is_staff(self):
-        return self.email == 'anthyef@gmail.com'
-    
-    @property
-    def is_active(self):
-        return True
-
+    is_staff = property(lambda self: self.email == 'anthyef@gmail.com')
+    is_active = property(lambda self: True)
