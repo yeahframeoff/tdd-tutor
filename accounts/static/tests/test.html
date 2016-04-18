@@ -75,6 +75,50 @@ test("watch sees current user", function() {
 
 });
 
+
+test("onlogin does ajax post to login url", function() {
+    Superlists.Accounts.initialize(mockNavigator, user, token, urls);
+    var onLoginCallBack = mockNavigator.id.watch.firstCall.args[0].onlogin;
+    onLoginCallBack();
+    equal(requests.length, 1, 'check ajax request');
+    equal(requests[0].method, 'POST');
+    equal(requests[0].url, urls.login, 'check url');
+
+});
+
+test("onlogin sends assertion with csrf token", function() {
+    Superlists.Accounts.initialize(mockNavigator, user, token, urls);
+    var onLoginCallBack = mockNavigator.id.watch.firstCall.args[0].onlogin;
+    var assertion = 'browser-id assertion';
+    onLoginCallBack(assertion);
+    equal(
+        requests[0].requestBody,
+        $.param({assertion: assertion, csrfmiddlewaretoken: token}),
+        'check POST data'
+    );
+});
+
+test("logout is just a placeholder", function() {
+    Superlists.Accounts.initialize(mockNavigator, user, token, urls);
+    var onLogoutCallBack = mockNavigator.id.watch.firstCall.args[0].onlogout;
+    equal(typeof onLogoutCallBack, "function", "onlogout should be a function");
+});
+
+test("onlogin post failure should result in navigator.id.logout", function() {
+    mockNavigator.id.logout = sinon.mock();
+    Superlists.Accounts.initialize(mockNavigator, user, token, urls);
+    var onloginCallback = mockNavigator.id.watch.firstCall.args[0].onlogin;
+    var server = sinon.fakeServer.create();
+    server.respondWith([403, {}, "permission denied"])
+
+    onloginCallback();
+    var onlogoutCallback = mockNavigator.id.watch.firstCall.args[0].onlogout;
+    equal(mockNavigator.id.logout.called, false, 'should not logout yet');
+
+    server.respond();
+    equal(mockNavigator.id.logout.called, true, 'should call logout');
+});
+
     </script>
 </body>
 </html>

@@ -4,7 +4,15 @@ jQuery(document).ready(function($) {
             navigator.id.request();
         });
 
-        navigator.id.watch({loggedInUser: user});
+        navigator.id.watch({
+            loggedInUser: user,
+            onlogin: function(assertion) {
+                $.post(urls.login, {assertion: assertion, csrfmiddlewaretoken: token})
+                    .done(function() { window.location.reload(); })
+                    .fail(function() { navigator.id.logout(); });
+            },
+            onlogout: function() {}
+        });
     };
 
     window.Superlists = {
