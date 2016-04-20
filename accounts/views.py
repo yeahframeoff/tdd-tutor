@@ -8,5 +8,4 @@ def persona_login(request):
     user = authenticate(assertion=request.POST['assertion'])
     if user:
         login(request, user)
-        return HttpResponse('OK')
-    return HttpResponse()
+    return HttpResponse('OK')
