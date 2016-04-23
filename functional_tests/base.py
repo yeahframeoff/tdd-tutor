@@ -3,6 +3,7 @@ from selenium import webdriver
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from unittest import skip
 
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -54,3 +55,33 @@ class FunctionalTest(StaticLiveServerTestCase):
     def get_element_input_box(self):
         locator = self.get_element_input_box_locator()
         return self.browser.find_element(*locator)
+
+    def wait_for_element_with_id(self, element_id):
+        return WebDriverWait(self.browser, timeout=30).until(
+            lambda browser: browser.find_element_by_id(element_id),
+            'Could not find element with id %s. Page text was:\n%s' %
+            (element_id, self.browser.find_element_by_tag_name('body').text)
+        )
+
+    def wait_for_page_ready(self, attempts=2):
+        attempts -= 1
+        for current_attempt in range(attempts + 1):
+            try:
+                return WebDriverWait(self.browser, timeout=30).until(
+                    lambda browser: browser.find_element_by_tag_name('body')
+                )
+            except StaleElementReferenceException:
+                if current_attempt == attempts:
+                    raise
+
+    def wait_to_be_logged_out(self, email):
+        self.wait_for_page_ready()
+        self.wait_for_element_with_id('id_login')
+        navbar = self.browser.find_element_by_css_selector('.navbar')
+        self.assertNotIn(email, navbar.text)
+
+    def wait_to_be_logged_in(self, email):
+        self.wait_for_page_ready()
+        self.wait_for_element_with_id('id_logout')
+        navbar = self.browser.find_element_by_css_selector('.navbar')
+        self.assertIn(email, navbar.text)
